@@ -1,0 +1,61 @@
+resilience4j.circuitbreaker:
+    configs:
+        default:
+            registerHealthIndicator: false
+            slidingWindowSize: 10
+            minimumNumberOfCalls: 5
+            permittedNumberOfCallsInHalfOpenState: 3
+            automaticTransitionFromOpenToHalfOpenEnabled: true
+            waitDurationInOpenState: 2s
+            failureRateThreshold: 50
+            eventConsumerBufferSize: 100
+            ignore-exceptions:
+              - feign.FeignException.FeignClientException
+            recordExceptions:
+              - feign.FeignException.FeignServerException    
+    instances:
+        myresilient:
+            baseConfig: default
+            minimumNumberOfCalls: 10
+
+resilience4j.retry:
+  configs:
+    default:
+      max-attempts: 3
+      waitDuration: 3000
+  instances:
+    myservice:
+      ignore-exceptions:
+        - feign.FeignException.FeignClientException
+      retry-exceptions:
+        - feign.FeignException.FeignServerException                
+    myresilient:
+      ignore-exceptions:
+        - feign.FeignException.FeignClientException
+      retry-exceptions:
+        - feign.FeignException.FeignServerException         
+
+resilience4j.ratelimiter:
+  configs:
+    default:
+      registerHealthIndicator: true
+  instances:
+    myservice:
+      baseConfig: default
+    myresilient:
+      baseConfig: default      
+
+resilience4j.bulkhead:
+    instances:
+      myservice:
+        maxConcurrentCalls: 25  
+      myresilient:
+        maxConcurrentCalls: 25          
+                
+server:
+  port: 9999       
+  
+spring:  
+  mvc:
+    pathmatch:
+      matching-strategy: ant-path-matcher        
